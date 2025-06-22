@@ -205,9 +205,3 @@ Check out the current dictionary in `backend/dictionary.go` – it's easy to add
 ## License
 
 This project is open source and available under the [MIT License](LICENSE). Feel free to use it, modify it, or learn from it.
-
----
-
-*Built with ❤️ in Germany, inspired by döner kebab and the beauty of language diversity.*
-
-**Live Demo**: [Try D.Ö.N.E.R online](https://your-deployment-url.com) (Coming soon!)
