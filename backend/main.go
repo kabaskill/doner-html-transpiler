@@ -163,7 +163,7 @@ func runServer() {
 		allowedOrigins := []string{
 			"http://localhost:5173",   // Vite dev server
 			"http://localhost:3000",   // Alternative dev port
-			"https://your-frontend-domain.com", // Replace with your production domain
+			"https://doner-html-transpiler.onrender.com", // Production domain
 		}
 		
 		// Check if origin is allowed
