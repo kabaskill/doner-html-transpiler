@@ -157,9 +157,8 @@ func runServer() {
 	// Initialize rate limiter: 100 requests per minute per IP
 	rateLimiter := NewRateLimiter(100, time.Minute)
 
-	// Enable CORS and handle preflight requests
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// CORS headers - restrict to specific origins in production
+	// CORS function
+	addCORSHeaders := func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 		allowedOrigins := []string{
 			"http://localhost:5173",   // Vite dev server
@@ -181,60 +180,19 @@ func runServer() {
 		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		if r.Method == "GET" && r.URL.Path == "/" {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"name": "D.Ö.N.E.R API",
-				"description": "Deutsche Öffnung zur Normalisierten ERkennung von Webseiten",
-				"version": "1.0.0",
-				"endpoints": map[string]string{
-					"/health":     "GET - Health check",
-					"/transpile":  "POST - Transpile German HTML to standard HTML",
-					"/dictionary": "GET - Get all supported tags and attributes",
-				},
-			})
-			return
-		}
-
-		http.NotFound(w, r)
-	})
+	}
 
 	// Health check endpoint
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		addSecurityHeaders(w)
-		
-		// CORS for health check
-		origin := r.Header.Get("Origin")
-		allowedOrigins := []string{
-			"http://localhost:5173",
-			"http://localhost:3000",
-			"https://your-frontend-domain.com",
-		}
-		
-		originAllowed := false
-		for _, allowed := range allowedOrigins {
-			if origin == allowed {
-				originAllowed = true
-				break
-			}
-		}
-		
-		if originAllowed || origin == "" {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-		}
-		w.Header().Set("Content-Type", "application/json")
+		addCORSHeaders(w, r)
 		
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 		
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
@@ -249,28 +207,7 @@ func runServer() {
 		}
 		
 		addSecurityHeaders(w)
-		
-		// CORS for transpile endpoint
-		origin := r.Header.Get("Origin")
-		allowedOrigins := []string{
-			"http://localhost:5173",
-			"http://localhost:3000",
-			"https://your-frontend-domain.com",
-		}
-		
-		originAllowed := false
-		for _, allowed := range allowedOrigins {
-			if origin == allowed {
-				originAllowed = true
-				break
-			}
-		}
-		
-		if originAllowed || origin == "" {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-		}
-		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		addCORSHeaders(w, r)
 		w.Header().Set("Content-Type", "application/json")
 
 		if r.Method == "OPTIONS" {
@@ -324,27 +261,7 @@ func runServer() {
 
 	// Dictionary endpoint - returns all supported tags and attributes
 	http.HandleFunc("/dictionary", func(w http.ResponseWriter, r *http.Request) {
-		// CORS for dictionary endpoint
-		origin := r.Header.Get("Origin")
-		allowedOrigins := []string{
-			"http://localhost:5173",
-			"http://localhost:3000",
-			"https://your-frontend-domain.com",
-		}
-		
-		originAllowed := false
-		for _, allowed := range allowedOrigins {
-			if origin == allowed {
-				originAllowed = true
-				break
-			}
-		}
-		
-		if originAllowed || origin == "" {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-		}
-		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		addCORSHeaders(w, r)
 		w.Header().Set("Content-Type", "application/json")
 
 		if r.Method == "OPTIONS" {
@@ -376,6 +293,15 @@ func runServer() {
 		
 		// Serve index.html for the root path and any non-API routes
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			// Add CORS headers
+			addCORSHeaders(w, r)
+			
+			// Handle preflight OPTIONS requests
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			
 			if r.URL.Path == "/" || (!strings.HasPrefix(r.URL.Path, "/api/") && 
 				!strings.HasPrefix(r.URL.Path, "/health") && 
 				!strings.HasPrefix(r.URL.Path, "/transpile") && 
@@ -388,6 +314,15 @@ func runServer() {
 	} else {
 		// Development mode - serve a simple message
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			// Add CORS headers
+			addCORSHeaders(w, r)
+			
+			// Handle preflight OPTIONS requests
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			
 			w.Header().Set("Content-Type", "text/html")
 			fmt.Fprintf(w, `<!DOCTYPE html>
 <html>
