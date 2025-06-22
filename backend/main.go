@@ -370,8 +370,42 @@ func runServer() {
 	// Serve static files in production
 	staticDir := "./static"
 	if _, err := os.Stat(staticDir); err == nil {
+		// Serve static assets
 		fs := http.FileServer(http.Dir(staticDir))
-		http.Handle("/static/", http.StripPrefix("/static/", fs))
+		http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(staticDir+"/assets"))))
+		
+		// Serve index.html for the root path and any non-API routes
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/" || (!strings.HasPrefix(r.URL.Path, "/api/") && 
+				!strings.HasPrefix(r.URL.Path, "/health") && 
+				!strings.HasPrefix(r.URL.Path, "/transpile") && 
+				!strings.HasPrefix(r.URL.Path, "/dictionary")) {
+				http.ServeFile(w, r, staticDir+"/index.html")
+			} else {
+				fs.ServeHTTP(w, r)
+			}
+		})
+	} else {
+		// Development mode - serve a simple message
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/html")
+			fmt.Fprintf(w, `<!DOCTYPE html>
+<html>
+<head>
+    <title>D.Ö.N.E.R API</title>
+</head>
+<body>
+    <h1>D.Ö.N.E.R API Server</h1>
+    <p>The API server is running. Frontend build not found.</p>
+    <h2>Available Endpoints:</h2>
+    <ul>
+        <li><a href="/health">GET /health</a> - Health check</li>
+        <li><a href="/dictionary">GET /dictionary</a> - View dictionary</li>
+        <li>POST /transpile - Transpile German HTML</li>
+    </ul>
+</body>
+</html>`)
+		})
 	}
 
 	fmt.Printf("Server starting on port %s...\n", port)

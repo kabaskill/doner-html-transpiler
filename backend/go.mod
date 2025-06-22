@@ -1,3 +1,3 @@
-module doner-html-translator
+module doner-html-transpiler
 
 go 1.24
