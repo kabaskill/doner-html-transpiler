@@ -15,7 +15,7 @@ interface DictionaryResponse {
   attributes: Record<string, string>;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_URL ;
 
 const createDictionaryPromise = (): Promise<DictionaryResponse | null> => {
   return fetch(`${API_BASE}/dictionary`)
