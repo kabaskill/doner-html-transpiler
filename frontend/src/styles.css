@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root{
+  --color-background: #282A36;
+  --color-foreground: #F8F8F2;
+  --color-primary: #BD93F9;
+  --color-secondary: #FF79C6;
+}
+
+@theme {
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+}
+
+@layer base {
+  html {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: 'Urbanist', sans-serif, monospace;
+  }
+}
