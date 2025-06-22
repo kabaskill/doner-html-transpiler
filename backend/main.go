@@ -349,5 +349,13 @@ func runServer() {
 	fmt.Printf("Transpile endpoint: http://localhost:%s/transpile\n", port)
 	fmt.Printf("Dictionary endpoint: http://localhost:%s/dictionary\n", port)
 	
+	// Check if static files exist
+	if _, err := os.Stat("./static"); err == nil {
+		fmt.Println("✓ Static files found - serving frontend")
+	} else {
+		fmt.Println("⚠ No static files found - API only mode")
+	}
+	
+	fmt.Printf("🥙 D.Ö.N.E.R server ready!\n")
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
