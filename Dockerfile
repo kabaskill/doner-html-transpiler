@@ -1,10 +1,18 @@
 # Build stage for frontend
 FROM node:18-alpine AS frontend-builder
 WORKDIR /app/frontend
+
+# Copy package files
 COPY frontend/package*.json ./
-RUN npm ci --only=production
+
+# Clean install with explicit dev dependencies
+RUN npm ci --include=dev
+
+# Copy source code
 COPY frontend/ ./
-RUN npm run build
+
+# Build with vite only (vite handles TypeScript compilation)
+RUN npx vite build
 
 # Build stage for backend
 FROM golang:1.24-alpine AS backend-builder
