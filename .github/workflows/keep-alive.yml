@@ -1,0 +1,22 @@
+name: Keep D.Ö.N.E.R Alive
+
+on:
+  schedule:
+    # Ping every 10 minutes (change as needed)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping D.Ö.N.E.R
+        run: |
+          echo "🥙 Pinging D.Ö.N.E.R..."
+          response=$(curl -s -w "%{http_code}" -o /dev/null https://doner-html-transpiler.onrender.com/health)
+          if [ "$response" = "200" ]; then
+            echo "✅ Ping successful (HTTP $response)"
+          else
+            echo "❌ Ping failed (HTTP $response)"
+            exit 1
+          fi
