@@ -9,9 +9,18 @@ RUN npm run build
 # Build stage for backend
 FROM golang:1.24-alpine AS backend-builder
 WORKDIR /app/backend
-COPY backend/go.mod backend/go.sum* ./
+
+# Copy go mod files first for better caching
+COPY backend/go.mod ./
+COPY backend/go.sum* ./
+
+# Download dependencies
 RUN go mod download
+
+# Copy source code
 COPY backend/ ./
+
+# Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
 # Final stage

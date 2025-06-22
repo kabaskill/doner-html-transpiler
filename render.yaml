@@ -1,5 +1,12 @@
 services:
   - type: web
+    name: doner-html-transpiler
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8080type: web
     name: doner-html-translator
     env: docker
     dockerfilePath: ./Dockerfile
